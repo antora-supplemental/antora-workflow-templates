@@ -16,14 +16,16 @@
 #
 # PREREQUISITES
 # -------------
-# Your repository should have a package.json with Antora dependencies:
+# Your repository should have a package.json with Antora as a dependency:
 #
 #   {
 #     "devDependencies": {
-#       "@antora/cli": "^3.1",
-#       "@antora/site-generator": "^3.1"
+#       "antora": "^3.1"
 #     }
 #   }
+#
+# The "antora" package bundles both CLI and site generator.
+# Alternatively: "@antora/cli" + "@antora/site-generator" separately.
 #
 # And a lockfile (package-lock.json, pnpm-lock.yaml, etc.) for reproducibility.
 #
