@@ -1,0 +1,218 @@
+# =============================================================================
+# DIY Antora Build & Deploy Workflow
+# =============================================================================
+#
+# This workflow builds an Antora documentation site with all steps spelled out
+# explicitly. Nothing is hidden - you can see exactly what happens.
+#
+# CROSS-REFERENCE: For a shorter version using a reusable action, see:
+#   action-workflow.yml in this same directory
+#
+# The two workflows produce IDENTICAL results. Choose based on preference:
+#   - This file (DIY): More verbose, but everything visible
+#   - action-workflow.yml: Shorter, but abstracts implementation details
+#
+# =============================================================================
+#
+# PREREQUISITES
+# -------------
+# Your repository should have a package.json with Antora dependencies:
+#
+#   {
+#     "devDependencies": {
+#       "@antora/cli": "^3.1",
+#       "@antora/site-generator": "^3.1"
+#     }
+#   }
+#
+# And a lockfile (package-lock.json, pnpm-lock.yaml, etc.) for reproducibility.
+#
+# This is better than global installs because:
+#   - Version is pinned in package.json
+#   - Lockfile ensures reproducible builds
+#   - Each project controls its own Antora version
+#
+# =============================================================================
+
+name: Build and Deploy Documentation (DIY)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# -----------------------------------------------------------------------------
+# PERMISSIONS
+# -----------------------------------------------------------------------------
+# These permissions are required for GitHub Pages deployment.
+# - contents:read    -> Read repository files
+# - pages:write      -> Upload to GitHub Pages
+# - id-token:write   -> Required for Pages deployment authentication
+# -----------------------------------------------------------------------------
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Prevent concurrent deployments to avoid conflicts
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # -----------------------------------------------------------------------
+      # STEP 1: Checkout Repository
+      # -----------------------------------------------------------------------
+      # Equivalent in action-workflow.yml:
+      #   Same - you still need to checkout your repo before using the action
+      # -----------------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -----------------------------------------------------------------------
+      # STEP 2: Configure GitHub Pages
+      # -----------------------------------------------------------------------
+      # Sets up the Pages environment. Required for the deploy step later.
+      # Equivalent in action-workflow.yml:
+      #   Same - the action doesn't handle Pages configuration
+      # -----------------------------------------------------------------------
+      - name: Configure Pages
+        uses: actions/configure-pages@v4
+
+      # -----------------------------------------------------------------------
+      # STEP 3: Setup pnpm (recommended) or npm
+      # -----------------------------------------------------------------------
+      # pnpm is faster and more disk-efficient than npm.
+      # If you prefer npm, remove this step and change later steps accordingly.
+      #
+      # Equivalent in action-workflow.yml:
+      #   The action uses npm by default. For pnpm support, use DIY workflow.
+      # -----------------------------------------------------------------------
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          # Reads pnpm version from package.json's packageManager field,
+          # or specify version explicitly: version: '9'
+          package_json_file: 'package.json'
+
+      # -----------------------------------------------------------------------
+      # STEP 4: Setup Node.js
+      # -----------------------------------------------------------------------
+      # Antora 3.x requires Node.js 16+. Version 20 LTS recommended.
+      #
+      # The cache option speeds up subsequent builds by caching node_modules.
+      # For npm, use: cache: 'npm'
+      #
+      # Equivalent in action-workflow.yml:
+      #   The action handles this internally via its 'node_version' input.
+      # -----------------------------------------------------------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          # For npm, use: cache: 'npm'
+
+      # -----------------------------------------------------------------------
+      # STEP 5: Install Dependencies
+      # -----------------------------------------------------------------------
+      # Installs Antora and any extensions from your package.json.
+      # Using --frozen-lockfile ensures reproducible builds by failing if
+      # the lockfile is out of sync with package.json.
+      #
+      # For npm, use: npm ci
+      #
+      # Equivalent in action-workflow.yml:
+      #   The action installs globally (less ideal but simpler for users
+      #   without a package.json). DIY approach is better practice.
+      # -----------------------------------------------------------------------
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        # For npm: run: npm ci
+
+      # -----------------------------------------------------------------------
+      # STEP 6: Build Antora Site
+      # -----------------------------------------------------------------------
+      # This is where the magic happens. Antora reads your playbook and:
+      #   1. Clones/fetches content from all source repositories
+      #   2. Converts AsciiDoc to HTML
+      #   3. Applies UI bundle
+      #   4. Outputs static site to build/site (or configured output dir)
+      #
+      # We use `pnpm exec` (or `npx` for npm) to run the locally-installed
+      # Antora rather than a global install. This ensures we use the exact
+      # version specified in package.json.
+      #
+      # THE GIT_CREDENTIALS ENVIRONMENT VARIABLE:
+      # -----------------------------------------
+      # When your playbook references PRIVATE repositories, Antora needs
+      # credentials to clone them. The GIT_CREDENTIALS env var provides this.
+      #
+      # Format: https://<username>:<password>@<host>
+      #
+      # For GitHub, the username is literally "x-access-token" (a GitHub
+      # convention), and the password is your Personal Access Token (PAT).
+      #
+      # To set this up:
+      #   1. Create a PAT at https://github.com/settings/tokens
+      #   2. Give it 'repo' scope (for private repos)
+      #   3. Add it as a repository secret (Settings > Secrets > Actions)
+      #   4. Reference it here as ${{ secrets.YOUR_SECRET_NAME }}
+      #
+      # Equivalent in action-workflow.yml:
+      #   The action accepts credentials via the 'git_credentials' input:
+      #     with:
+      #       git_credentials: "https://x-access-token:${{ secrets.MY_PAT }}@github.com"
+      #
+      #   Or for GitHub-only, use the simpler 'github_token' input:
+      #     with:
+      #       github_token: ${{ secrets.MY_PAT }}
+      # -----------------------------------------------------------------------
+      - name: Build Antora site
+        env:
+          # CHANGE THIS: Replace MY_GITHUB_PAT with your secret name
+          # If all your content repos are public, you can remove this env block
+          GIT_CREDENTIALS: "https://x-access-token:${{ secrets.MY_GITHUB_PAT }}@github.com"
+        run: pnpm exec antora --fetch antora-playbook.yml
+        # For npm: run: npx antora --fetch antora-playbook.yml
+
+      # -----------------------------------------------------------------------
+      # STEP 7: Upload Pages Artifact
+      # -----------------------------------------------------------------------
+      # Packages the built site for GitHub Pages deployment.
+      #
+      # IMPORTANT: The 'path' must match where Antora outputs the site.
+      # Default is 'build/site' unless you changed it in your playbook's
+      # output.dir setting.
+      #
+      # Equivalent in action-workflow.yml:
+      #   Same - you still need this step after the action runs.
+      #   The action sets an output 'site_dir' you can use:
+      #     path: ${{ steps.build.outputs.site_dir }}
+      # -----------------------------------------------------------------------
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/site
+
+  # ---------------------------------------------------------------------------
+  # DEPLOY JOB
+  # ---------------------------------------------------------------------------
+  # Deploys the built site to GitHub Pages.
+  # This is identical in both DIY and action workflows.
+  # ---------------------------------------------------------------------------
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

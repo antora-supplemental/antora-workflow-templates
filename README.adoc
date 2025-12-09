@@ -1,0 +1,179 @@
+= Antora Workflow Templates
+:toc: macro
+:toc-title: Contents
+:toclevels: 2
+:icons: font
+
+Starter workflow templates for building https://antora.org[Antora] documentation sites with GitHub Actions.
+
+toc::[]
+
+== Overview
+
+This repository provides **two equivalent workflows** for building and deploying Antora documentation to GitHub Pages:
+
+[cols="1,1,2"]
+|===
+| File | Approach | Best For
+
+| `diy-workflow.yml`
+| DIY (all steps visible)
+| Understanding what's happening, full control
+
+| `action-workflow.yml`
+| Reusable action
+| Shorter config, standard interface
+|===
+
+**Both produce identical results.** Choose based on your preference for transparency vs. brevity.
+
+== Prerequisites
+
+Your repository needs a `package.json` with Antora as a local dependency:
+
+[source,json]
+----
+{
+  "devDependencies": {
+    "@antora/cli": "^3.1",
+    "@antora/site-generator": "^3.1"
+  }
+}
+----
+
+Run `npm install` or `pnpm install` to generate a lockfile.
+
+[WARNING]
+====
+**Do not use global installation** (`npm install -g @antora/cli`).
+
+Global installs lead to unreproducible builds because "latest" resolves to whatever version exists at build time, and there's no lockfile to ensure consistency.
+
+The https://docs.antora.org/antora/latest/install/install-antora/#locally-vs-globally[Antora documentation recommends local installation]:
+
+> "Installing Antora locally makes it easier to manage the version of Antora and ensures that the version of Antora matches the version for which the playbook was made."
+====
+
+== Quick Start
+
+. Ensure you have a `package.json` with Antora dependencies (see above)
+. Copy one of the workflow files to your repo's `.github/workflows/` directory
+. Rename it (e.g., `docs.yml` or `build-and-deploy.yml`)
+. Update the `playbook` path if yours isn't `antora-playbook.yml`
+. If you have private content repos, set up credentials (see below)
+. Commit and push to trigger the workflow
+
+== Credential Setup for Private Repositories
+
+If your Antora playbook references private Git repositories, you need to provide credentials.
+
+=== Step 1: Create a Personal Access Token (PAT)
+
+. Go to https://github.com/settings/tokens[GitHub Token Settings]
+. Click "Generate new token" (classic)
+. Give it a descriptive name like "Antora Docs Build"
+. Select the `repo` scope (required for private repos)
+. Click "Generate token" and copy the token
+
+=== Step 2: Add Token as Repository Secret
+
+. Go to your documentation repo on GitHub
+. Settings → Secrets and variables → Actions
+. Click "New repository secret"
+. Name it (e.g., `DOCS_PAT` or `MY_GITHUB_PAT`)
+. Paste your token as the value
+. Click "Add secret"
+
+=== Step 3: Reference in Workflow
+
+In **diy-workflow.yml**, update the `GIT_CREDENTIALS` environment variable:
+
+[source,yaml]
+----
+env:
+  GIT_CREDENTIALS: "https://x-access-token:${{ secrets.DOCS_PAT }}@github.com"
+----
+
+In **action-workflow.yml**, update the `git_credentials` input:
+
+[source,yaml]
+----
+with:
+  git_credentials: "https://x-access-token:${{ secrets.DOCS_PAT }}@github.com"
+----
+
+== Multi-Host Credentials (GitHub + GitLab)
+
+If your playbook pulls content from both GitHub and GitLab:
+
+[source,yaml]
+----
+# DIY workflow
+env:
+  GIT_CREDENTIALS: |
+    https://x-access-token:${{ secrets.GITHUB_PAT }}@github.com
+    https://oauth2:${{ secrets.GITLAB_PAT }}@gitlab.com
+
+# Action workflow
+with:
+  git_credentials: |
+    https://x-access-token:${{ secrets.GITHUB_PAT }}@github.com
+    https://oauth2:${{ secrets.GITLAB_PAT }}@gitlab.com
+----
+
+== Workflow Comparison
+
+The table below shows how the DIY workflow steps map to action inputs:
+
+[cols="2,2,2"]
+|===
+| What It Does | DIY Workflow | Action Input
+
+| Choose Node.js version
+| `actions/setup-node` with `node-version`
+| `node_version: '20'`
+
+| Choose Antora version
+| `npm install @antora/cli@X.X.X`
+| `antora_version: '3.1.7'`
+
+| Install extensions
+| `npm install -g @antora/lunr-extension`
+| `extensions: '@antora/lunr-extension'`
+
+| Provide credentials
+| `GIT_CREDENTIALS` env var
+| `git_credentials` or `github_token`
+
+| Specify playbook
+| Argument to `antora` command
+| `playbook: 'antora-playbook.yml'`
+
+| Fetch latest content
+| `--fetch` flag
+| `fetch: 'true'`
+
+| Set log verbosity
+| `--log-level` flag
+| `log_level: 'info'`
+
+| Build in subdirectory
+| `working-directory:` on run step
+| `working_directory: 'docs'`
+|===
+
+== Related Resources
+
+* https://github.com/amdphreak/antora-github-action[amdphreak/antora-github-action] -- The reusable action used by `action-workflow.yml`
+* https://docs.antora.org/antora/latest/publish-to-github-pages/[Antora: Publish to GitHub Pages] -- Official documentation
+* https://docs.antora.org/antora/latest/playbook/private-repository-auth/[Antora: Private Repository Authentication] -- Credential formats
+
+== License
+
+MIT License. See link:LICENSE[LICENSE] file.
+
+== Disclaimer
+
+This is a community-maintained project, not officially affiliated with Antora.
+The official Antora project is at https://gitlab.com/antora/antora.
+

@@ -1,0 +1,162 @@
+# =============================================================================
+# Antora Build & Deploy Workflow (Using Reusable Action)
+# =============================================================================
+#
+# This workflow uses the amdphreak/antora-github-action to build an Antora
+# documentation site. The action abstracts away Node.js setup and Antora
+# installation.
+#
+# CROSS-REFERENCE: For a DIY version with all steps spelled out, see:
+#   diy-workflow.yml in this same directory
+#
+# The two workflows produce IDENTICAL results. Choose based on preference:
+#   - diy-workflow.yml: More verbose, but everything visible
+#   - This file (action): Shorter, but abstracts implementation details
+#
+# =============================================================================
+#
+# PREREQUISITES
+# -------------
+# This action REQUIRES a package.json with Antora as a local dependency.
+# See diy-workflow.yml header or README.adoc for the package.json format.
+#
+# Global installation (npm install -g) is NOT supported because it leads to
+# unreproducible builds. See:
+# https://docs.antora.org/antora/latest/install/install-antora/#locally-vs-globally
+#
+# =============================================================================
+
+name: Build and Deploy Documentation (Action)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# -----------------------------------------------------------------------------
+# PERMISSIONS
+# -----------------------------------------------------------------------------
+# Same as DIY workflow - required for GitHub Pages deployment.
+# The action itself doesn't require any special permissions.
+# -----------------------------------------------------------------------------
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # -----------------------------------------------------------------------
+      # STEP 1: Checkout Repository
+      # -----------------------------------------------------------------------
+      # Same as DIY workflow - always needed to get your playbook and
+      # any local content.
+      # -----------------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -----------------------------------------------------------------------
+      # STEP 2: Configure GitHub Pages
+      # -----------------------------------------------------------------------
+      # Same as DIY workflow.
+      # -----------------------------------------------------------------------
+      - name: Configure Pages
+        uses: actions/configure-pages@v4
+
+      # -----------------------------------------------------------------------
+      # STEP 3: Build Antora Site (using reusable action)
+      # -----------------------------------------------------------------------
+      # This single step replaces DIY steps 3-6:
+      #   - Setup pnpm/npm       -> action auto-detects from lockfile
+      #   - Setup Node.js        -> action input: node_version
+      #   - Install dependencies -> action runs npm ci / pnpm install
+      #   - Build Antora site    -> action input: playbook, git_credentials
+      #
+      # The action requires a package.json with @antora/cli as a dependency.
+      # It auto-detects whether to use pnpm or npm based on lockfile presence.
+      #
+      # GIT CREDENTIALS:
+      # ----------------
+      # The 'git_credentials' input accepts the same format as the
+      # GIT_CREDENTIALS environment variable in the DIY workflow:
+      #
+      #   https://x-access-token:${{ secrets.MY_PAT }}@github.com
+      #
+      # For GitHub-only setups, you can use the simpler 'github_token' input:
+      #
+      #   github_token: ${{ secrets.MY_PAT }}
+      #
+      # For multi-host setups (GitHub + GitLab), use git_credentials with
+      # multiple lines:
+      #
+      #   git_credentials: |
+      #     https://x-access-token:${{ secrets.GITHUB_PAT }}@github.com
+      #     https://oauth2:${{ secrets.GITLAB_PAT }}@gitlab.com
+      #
+      # HOW THIS MAPS TO DIY WORKFLOW:
+      # ------------------------------
+      # | Action Input       | DIY Equivalent                              |
+      # |--------------------|---------------------------------------------|
+      # | playbook           | The argument to `antora` command            |
+      # | git_credentials    | GIT_CREDENTIALS env var                     |
+      # | github_token       | GIT_CREDENTIALS with github.com only        |
+      # | node_version       | actions/setup-node version                  |
+      # | fetch              | --fetch flag on antora command              |
+      # | log_level          | --log-level flag on antora command          |
+      # | working_directory  | Directory containing package.json/playbook  |
+      # | output_dir         | Where the site is generated (for reference) |
+      # -----------------------------------------------------------------------
+      - name: Build Antora site
+        id: build
+        uses: amdphreak/antora-github-action@v1
+        with:
+          playbook: antora-playbook.yml
+          
+          # CHANGE THIS: Replace MY_GITHUB_PAT with your secret name
+          # If all your content repos are public, you can remove this line
+          git_credentials: "https://x-access-token:${{ secrets.MY_GITHUB_PAT }}@github.com"
+          
+          # Or use the simpler github_token input for GitHub-only:
+          # github_token: ${{ secrets.MY_GITHUB_PAT }}
+          
+          # Optional: customize these as needed
+          # node_version: '20'
+          # fetch: 'true'
+          # log_level: 'warn'
+          # working_directory: '.'
+
+      # -----------------------------------------------------------------------
+      # STEP 4: Upload Pages Artifact
+      # -----------------------------------------------------------------------
+      # Same as DIY workflow step 7.
+      # Uses the action's output to get the site directory path.
+      # -----------------------------------------------------------------------
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Use the action's output, or hardcode 'build/site' like DIY
+          path: ${{ steps.build.outputs.site_dir }}
+
+  # ---------------------------------------------------------------------------
+  # DEPLOY JOB
+  # ---------------------------------------------------------------------------
+  # Identical to DIY workflow.
+  # ---------------------------------------------------------------------------
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
