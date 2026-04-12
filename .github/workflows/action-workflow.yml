@@ -63,17 +63,7 @@ jobs:
         uses: actions/checkout@v4
 
       # -----------------------------------------------------------------------
-      # STEP 2: Configure GitHub Pages
-      # -----------------------------------------------------------------------
-      # Same as DIY workflow.
-      # -----------------------------------------------------------------------
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
-      # -----------------------------------------------------------------------
-      # STEP 3: Build Antora Site (using reusable action)
+      # STEP 2: Build Antora Site (using reusable action)
       # -----------------------------------------------------------------------
       # This single step replaces DIY steps 3-6:
       #   - Setup pnpm/npm       -> action auto-detects from lockfile
@@ -135,7 +125,7 @@ jobs:
           # working_directory: '.'
 
       # -----------------------------------------------------------------------
-      # STEP 4: Upload Pages Artifact
+      # STEP 3: Upload Pages Artifact
       # -----------------------------------------------------------------------
       # Same as DIY workflow step 7.
       # Uses the action's output to get the site directory path.

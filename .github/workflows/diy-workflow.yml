@@ -76,19 +76,7 @@ jobs:
         uses: actions/checkout@v4
 
       # -----------------------------------------------------------------------
-      # STEP 2: Configure GitHub Pages
-      # -----------------------------------------------------------------------
-      # Sets up the Pages environment. Required for the deploy step later.
-      # Equivalent in action-workflow.yml:
-      #   Same - the action doesn't handle Pages configuration
-      # -----------------------------------------------------------------------
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
-      # -----------------------------------------------------------------------
-      # STEP 3: Setup pnpm (recommended) or npm
+      # STEP 2: Setup pnpm (recommended) or npm
       # -----------------------------------------------------------------------
       # pnpm is faster and more disk-efficient than npm.
       # If you prefer npm, remove this step and change later steps accordingly.
@@ -104,7 +92,7 @@ jobs:
           package_json_file: 'package.json'
 
       # -----------------------------------------------------------------------
-      # STEP 4: Setup Node.js
+      # STEP 3: Setup Node.js
       # -----------------------------------------------------------------------
       # Antora 3.x requires Node.js 16+. Version 20 LTS recommended.
       #
@@ -122,7 +110,7 @@ jobs:
           # For npm, use: cache: 'npm'
 
       # -----------------------------------------------------------------------
-      # STEP 5: Install Dependencies
+      # STEP 4: Install Dependencies
       # -----------------------------------------------------------------------
       # Installs Antora and any extensions from your package.json.
       # Using --frozen-lockfile ensures reproducible builds by failing if
@@ -139,7 +127,7 @@ jobs:
         # For npm: run: npm ci
 
       # -----------------------------------------------------------------------
-      # STEP 6: Build Antora Site
+      # STEP 5: Build Antora Site
       # -----------------------------------------------------------------------
       # This is where the magic happens. Antora reads your playbook and:
       #   1. Clones/fetches content from all source repositories
@@ -185,7 +173,7 @@ jobs:
         # For npm: run: npx antora --fetch antora-playbook.yml
 
       # -----------------------------------------------------------------------
-      # STEP 7: Upload Pages Artifact
+      # STEP 6: Upload Pages Artifact
       # -----------------------------------------------------------------------
       # Packages the built site for GitHub Pages deployment.
       #
