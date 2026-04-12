@@ -176,7 +176,7 @@ The table below shows how the DIY workflow steps map to action inputs:
 
 == Related Resources
 
-* https://github.com/amdphreak/antora-github-action[amdphreak/antora-github-action] -- The reusable action used by `action-workflow.yml`
+* https://github.com/antora-supplemental/antora-build-action[antora-supplemental/antora-build-action] -- The reusable action used by `action-workflow.yml`
 * https://docs.antora.org/antora/latest/publish-to-github-pages/[Antora: Publish to GitHub Pages] -- Official documentation
 * https://docs.antora.org/antora/latest/playbook/private-repository-auth/[Antora: Private Repository Authentication] -- Credential formats
 
