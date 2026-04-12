@@ -68,7 +68,9 @@ jobs:
       # Same as DIY workflow.
       # -----------------------------------------------------------------------
       - name: Configure Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       # -----------------------------------------------------------------------
       # STEP 3: Build Antora Site (using reusable action)

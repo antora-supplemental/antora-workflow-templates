@@ -83,7 +83,9 @@ jobs:
       #   Same - the action doesn't handle Pages configuration
       # -----------------------------------------------------------------------
       - name: Configure Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       # -----------------------------------------------------------------------
       # STEP 3: Setup pnpm (recommended) or npm
