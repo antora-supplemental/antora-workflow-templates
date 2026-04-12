@@ -28,9 +28,9 @@
 
 name: Build and Deploy Documentation (Action)
 
+# This repository only holds example YAML; it is not a full Antora site.
+# Run manually after copying these files into a repo that has package.json + playbook.
 on:
-  push:
-    branches: [main, master]
   workflow_dispatch:
 
 # -----------------------------------------------------------------------------
