@@ -40,7 +40,7 @@ name: Build and Deploy Documentation (DIY)
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   workflow_dispatch:
 
 # -----------------------------------------------------------------------------
