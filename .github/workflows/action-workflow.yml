@@ -2,7 +2,7 @@
 # Antora Build & Deploy Workflow (Using Reusable Action)
 # =============================================================================
 #
-# This workflow uses the amdphreak/antora-github-action to build an Antora
+# This workflow uses antora-supplemental/antora-build-action to build an Antora
 # documentation site. The action abstracts away Node.js setup and Antora
 # installation.
 #
@@ -115,7 +115,7 @@ jobs:
       # -----------------------------------------------------------------------
       - name: Build Antora site
         id: build
-        uses: amdphreak/antora-github-action@v1
+        uses: antora-supplemental/antora-build-action@v1
         with:
           playbook: antora-playbook.yml
           
