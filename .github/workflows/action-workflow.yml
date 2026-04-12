@@ -115,7 +115,7 @@ jobs:
       # -----------------------------------------------------------------------
       - name: Build Antora site
         id: build
-        uses: antora-supplemental/antora-build-action@v1
+        uses: antora-supplemental/antora-build-action@v2
         with:
           playbook: antora-playbook.yml
           
