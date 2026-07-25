@@ -174,9 +174,35 @@ The table below shows how the DIY workflow steps map to action inputs:
 | `working_directory: 'docs'`
 |===
 
+== Notify an aggregated docs hub (no polling)
+
+When this repo is a **content source** for an Antora playbook elsewhere (e.g. `antora-supplemental/docs`), poke the hub after docs change.
+
+Architecture (link from PRs):: https://antora-supplemental.github.io/docs/docs/site-rebuild.html[Site rebuild v1/v2] (after next docs deploy) — source: `docs` repo `site-rebuild.adoc`.
+
+=== Preferred: `gh` one-liner (agent-friendly)
+
+[source,shell]
+----
+gh api repos/antora-supplemental/docs/dispatches \
+  -f event_type=docs-source-updated \
+  -f client_payload[source]=$(gh repo view --json nameWithOwner -q .nameWithOwner) \
+  -f client_payload[ref]=$(git rev-parse --abbrev-ref HEAD) \
+  -f client_payload[sha]=$(git rev-parse HEAD)
+----
+
+Or run link:scripts/notify-docs-hub.sh[`scripts/notify-docs-hub.sh`].
+
+=== Optional: auto on push
+
+Copy link:.github/workflows/notify-docs-hub.yml[`.github/workflows/notify-docs-hub.yml`] into the content-source repo.
+Set secret `DOCS_DISPATCH_TOKEN` with permission to create `repository_dispatch` on the hub.
+If the secret is missing, the workflow no-ops (safe for forks).
+
 == Related Resources
 
 * https://github.com/antora-supplemental/antora-build-action[antora-supplemental/antora-build-action] -- The reusable action used by `action-workflow.yml`
+* https://github.com/antora-supplemental/antora-serve[antora-supplemental/antora-serve] -- Local generate + watch + live reload
 * https://docs.antora.org/antora/latest/publish-to-github-pages/[Antora: Publish to GitHub Pages] -- Official documentation
 * https://docs.antora.org/antora/latest/playbook/private-repository-auth/[Antora: Private Repository Authentication] -- Credential formats
 

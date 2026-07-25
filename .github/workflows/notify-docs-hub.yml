@@ -1,0 +1,35 @@
+# Optional: push docs/ → poke the aggregated site hub (full Antora regenerate).
+# Prefer the one-liner when an agent is already pushing:
+#   gh api repos/antora-supplemental/docs/dispatches -f event_type=docs-source-updated ...
+#
+# Copy into a content-source repo as .github/workflows/notify-docs-hub.yml
+# Requires secret DOCS_DISPATCH_TOKEN (PAT/App that can dispatch into the hub).
+
+name: Notify docs hub
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "docs/**"
+      - "antora.yml"
+      - "modules/**"
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch docs-source-updated
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_DISPATCH_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "DOCS_DISPATCH_TOKEN not set; skip notify (use gh api locally instead)."
+            exit 0
+          fi
+          gh api "repos/antora-supplemental/docs/dispatches" \
+            -f event_type=docs-source-updated \
+            -f "client_payload[source]=${{ github.repository }}" \
+            -f "client_payload[ref]=${{ github.ref }}" \
+            -f "client_payload[sha]=${{ github.sha }}"
