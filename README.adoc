@@ -6,21 +6,12 @@ ifndef::env-github[:icons: font]
 :sectanchors:
 endif::[]
 
-ifndef::env-github[]
+[[readme-top]]
 image:https://img.shields.io/github/contributors/antora-supplemental/antora-workflow-templates.svg?style=for-the-badge[Contributors,link=https://github.com/antora-supplemental/antora-workflow-templates/graphs/contributors]
 image:https://img.shields.io/github/forks/antora-supplemental/antora-workflow-templates.svg?style=for-the-badge[Forks,link=https://github.com/antora-supplemental/antora-workflow-templates/network/members]
 image:https://img.shields.io/github/stars/antora-supplemental/antora-workflow-templates.svg?style=for-the-badge[Stars,link=https://github.com/antora-supplemental/antora-workflow-templates/stargazers]
 image:https://img.shields.io/github/issues/antora-supplemental/antora-workflow-templates.svg?style=for-the-badge[Issues,link=https://github.com/antora-supplemental/antora-workflow-templates/issues]
 image:https://img.shields.io/github/license/antora-supplemental/antora-workflow-templates.svg?style=for-the-badge[License,link=https://github.com/antora-supplemental/antora-workflow-templates/blob/master/LICENSE]
-endif::[]
-
-ifdef::env-github[]
-image:https://img.shields.io/github/contributors/antora-supplemental/antora-workflow-templates.svg?style=for-the-badge[Contributors]
-image:https://img.shields.io/github/forks/antora-supplemental/antora-workflow-templates.svg?style=for-the-badge[Forks]
-image:https://img.shields.io/github/stars/antora-supplemental/antora-workflow-templates.svg?style=for-the-badge[Stars]
-image:https://img.shields.io/github/issues/antora-supplemental/antora-workflow-templates.svg?style=for-the-badge[Issues]
-image:https://img.shields.io/github/license/antora-supplemental/antora-workflow-templates.svg?style=for-the-badge[License]
-endif::[]
 
 = Antora Workflow Templates
 
@@ -47,6 +38,8 @@ This repository provides **two equivalent workflows** for building and deploying
 |===
 
 **Both produce identical results.** Choose based on your preference for transparency vs. brevity.
+
+link:#readme-top[back to top]
 
 == Prerequisites
 
@@ -231,6 +224,8 @@ If the secret is missing, the workflow no-ops (safe for forks).
 
 MIT License. See link:LICENSE[LICENSE] file.
 
+link:#readme-top[back to top]
+
 == Contact
 
 Antora Supplemental — support@antora-supplemental.org
@@ -238,8 +233,9 @@ Antora Supplemental — support@antora-supplemental.org
 * Project: https://github.com/antora-supplemental/antora-workflow-templates
 * Site: https://antora-supplemental.org
 
+link:#readme-top[back to top]
+
 == Disclaimer
 
 This is a community-maintained project, not officially affiliated with Antora.
 The official Antora project is at https://gitlab.com/antora/antora.
-
