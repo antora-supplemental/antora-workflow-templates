@@ -60,7 +60,7 @@ jobs:
       # any local content.
       # -----------------------------------------------------------------------
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # -----------------------------------------------------------------------
       # STEP 2: Build Antora Site (using reusable action)
@@ -107,7 +107,7 @@ jobs:
       # -----------------------------------------------------------------------
       - name: Build Antora site
         id: build
-        uses: antora-supplemental/antora-build-action@v2
+        uses: antora-supplemental/antora-build-action@v3
         with:
           playbook: antora-playbook.yml
           
@@ -131,7 +131,7 @@ jobs:
       # Uses the action's output to get the site directory path.
       # -----------------------------------------------------------------------
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           # Use the action's output, or hardcode 'build/site' like DIY
           path: ${{ steps.build.outputs.site_dir }}
@@ -151,4 +151,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
