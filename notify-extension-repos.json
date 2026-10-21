@@ -1,0 +1,33 @@
+{
+  "repos": [
+    "antora-ai-help-extension",
+    "antora-dark-mode",
+    "antora-diagram-engines",
+    "antora-incremental",
+    "antora-live",
+    "antora-search-chat",
+    "antora-ui-chassis",
+    "antora-unversioned-component-urls",
+    "architexture-theme",
+    "asciidoc-interactive",
+    "asciidoctor-emoji-literals",
+    "build-stack",
+    "extension-lister",
+    "facto-stack",
+    "link-validator",
+    "linkinator",
+    "nav-typology",
+    "nav-typology-diataxis",
+    "orphan-finder",
+    "page-context",
+    "page-edit",
+    "site-nav-tree",
+    "soft-nav-page-toc",
+    "triage-ux-kit",
+    "valentus-theme",
+    "deep-link-contracts",
+    "nav-drift",
+    "playbook-pin-auditor",
+    "stale-page"
+  ]
+}

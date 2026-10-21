@@ -261,6 +261,24 @@ Copy link:.github/workflows/notify-docs-hub.yml[`.github/workflows/notify-docs-h
 Set secret `DOCS_DISPATCH_TOKEN` with permission to create `repository_dispatch` on the hub.
 If the secret is missing, the workflow no-ops (safe for forks).
 
+=== Extensions / themes / compose packs (`extension-updated`)
+
+When `lib/`, `supplemental-ui/`, `ui-modules/`, `packages/`, or `package.json` changes, poke the hub with `extension-updated` (not `docs-source-updated`).
+
+Copy link:.github/workflows/notify-docs-hub-extension.yml[`.github/workflows/notify-docs-hub-extension.yml`], or run from this repo:
+
+[source,shell]
+----
+node scripts/install-notify-docs-hub-extension.mjs
+----
+
+Manifest: link:notify-extension-repos.json[`notify-extension-repos.json`] (repos in the org hive).
+
+[source,shell]
+----
+./scripts/notify-docs-hub.sh extension-updated
+----
+
 == Related Resources
 
 * https://github.com/antora-supplemental/antora-build-action[antora-supplemental/antora-build-action] -- The reusable action used by `action-workflow.yml`
